@@ -30,18 +30,21 @@ libMecab = ffi.Library 'libmecab',
 
 
 # init
-modelPtr = libMecab.mecab_model_new2 ''
-if modelPtr.isNull()
-  errorString = libMecab.mecab_strerror null
-  return throw new Error "Failed to create a new model - #{errorString}"
+modelPtr = null
+taggerPtr = null
+init = () ->
+  modelPtr = libMecab.mecab_model_new2 ''
+  if modelPtr.isNull()
+    errorString = libMecab.mecab_strerror null
+    return throw new Error "Failed to create a new model - #{errorString}"
 
-taggerPtr = libMecab.mecab_model_new_tagger modelPtr
-if taggerPtr.isNull()
-  libMecab.mecab_model_destroy modelPtr
-  errorString = libMecab.mecab_strerror taggerPtr
-  return throw new Error "Failed to create a new tagger - #{errorString}"
+  taggerPtr = libMecab.mecab_model_new_tagger modelPtr
+  if taggerPtr.isNull()
+    libMecab.mecab_model_destroy modelPtr
+    errorString = libMecab.mecab_strerror taggerPtr
+    return throw new Error "Failed to create a new tagger - #{errorString}"
 
-
+init()
 
 class MeCab
 
@@ -53,9 +56,11 @@ parseMeCabOutputString = (outputString) ->
 
   result[0...-2]
 
-
+MeCab.redresh = () ->
+  init()
 
 MeCab.parse = (inputString, callback) ->
+  MeCab.redresh()
   async.waterfall [
     (callback) ->
       libMecab.mecab_model_new_lattice.async modelPtr, (err, latticePtr) ->
@@ -88,6 +93,7 @@ MeCab.parse = (inputString, callback) ->
 
 
 MeCab.parseSync = (inputString) ->
+  MeCab.redresh()
   latticePtr = libMecab.mecab_model_new_lattice modelPtr
   if latticePtr.isNull()
     errorString = libMecab.mecab_strerror taggerPtr

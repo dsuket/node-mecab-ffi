@@ -44,7 +44,7 @@ init = () ->
     errorString = libMecab.mecab_strerror taggerPtr
     return throw new Error "Failed to create a new tagger - #{errorString}"
 
-init()
+#init()
 
 class MeCab
 

@@ -15,6 +15,16 @@ describe 'mecab', ->
         done()
 
 
+  describe.only '.refresh(...)', ->
+    it 'should be done', (done) ->
+      mecab.refresh(() ->
+        mecab.parse inputString, (err, result) ->
+          should.not.exist err
+          should.exist result
+          done()
+      )
+
+
   describe '.parseSync(...)', ->
     it 'should be done', (done) ->
       result = mecab.parseSync inputString
